@@ -2,10 +2,13 @@
 
 namespace App\Exceptions;
 
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use TypeError;
+use Symfony\Component\HttpFoundation\Response;
 
 class Handler extends ExceptionHandler
 {
@@ -28,6 +31,17 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Exception|Throwable $exception)
+    {
+        if($exception instanceof TypeError){
+            return response()->json(
+                ['error' => $exception->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return parent::render($request, $exception);
     }
 
     /**

@@ -23,7 +23,11 @@ class UrlHandlerService
 
     private function retrieveFromCache($code)
     {
-        return Cache::get($code);
+        if(Cache::has($code)){
+            return Cache::get($code);
+        }
+
+        return [];
     }
 
     /**

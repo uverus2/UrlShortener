@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UrlShortenerRequest;
+use App\Services\ErrorHandler\ErrorHandlerService;
 use App\Services\UrlHandler\UrlHandlerService;
+use App\UtilityTraits\GeneralTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -13,10 +15,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UrlShortener extends Controller
 {
-    protected $handler;
-    public function __construct(UrlHandlerService $urlHandlerService)
+    use GeneralTrait;
+
+    protected UrlHandlerService $handler;
+    protected ErrorHandlerService $errorHandler;
+
+    public function __construct(UrlHandlerService $urlHandlerService, ErrorHandlerService $errorHandler)
     {
         $this->handler = $urlHandlerService;
+        $this->errorHandler = $errorHandler;
     }
 
     /**
@@ -37,53 +44,59 @@ class UrlShortener extends Controller
            );
 
         }catch(Exception $e){
-
+           return $this->errorHandler->handleException($e);
         }
     }
 
     /**
      * @param UrlShortenerRequest $request
-     * @return JsonResponse|void
+     * @return JsonResponse
      */
-    public function decodeBySpecificUrl(UrlShortenerRequest $request)
+    public function decodeBySpecificUrl(UrlShortenerRequest $request): JsonResponse
     {
         try{
-            $decodeUrl = $this->handler->decode($request->input('url'));
+            $decodedUrl = $this->handler->decode($request->input('url'));
+            $this->verifyUrlIsFound($decodedUrl);
+
             return response()->json([
-                'original_url' => $decodeUrl['original_url']
+                'original_url' => $decodedUrl['original_url']
             ], Response::HTTP_OK);
         }catch(Exception $e){
-
+           return $this->errorHandler->handleException($e);
         }
     }
 
     /**
      * @param $urlCode
-     * @return JsonResponse|void
+     * @return JsonResponse
      */
-    public function decodeBySpecificUrlCode($urlCode)
+    public function decodeBySpecificUrlCode($urlCode): JsonResponse
     {
         try{
-            $decodeUrl = $this->handler->decodeByCode($urlCode);
+            $decodedUrl = $this->handler->decodeByCode($urlCode);
+            $this->verifyUrlIsFound($decodedUrl);
+
             return response()->json([
-                'original_url' => $decodeUrl['original_url']
+                'original_url' => $decodedUrl['original_url']
             ], Response::HTTP_OK);
         }catch(Exception $e){
-
+            return $this->errorHandler->handleException($e);
         }
     }
 
     /**
      * @param UrlShortenerRequest $request
-     * @return RedirectResponse|void
+     * @return RedirectResponse|JsonResponse
      */
-    public function redirectToUrl(UrlShortenerRequest $request)
+    public function redirectToUrl(UrlShortenerRequest $request): JsonResponse|RedirectResponse
     {
         try{
-            $decodeUrl = $this->handler->decode($request->input('url'));
-            return redirect()->away($decodeUrl['original_url']);
-        }catch(Exception $e){
+            $decodedUrl = $this->handler->decode($request->input('url'));
+            $this->verifyUrlIsFound($decodedUrl);
 
+            return redirect()->away($decodedUrl['original_url']);
+        }catch(Exception $e){
+            return $this->errorHandler->handleException($e);
         }
     }
 }
