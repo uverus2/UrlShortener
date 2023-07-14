@@ -7,17 +7,7 @@ use App\Services\UrlHandler\UrlShortenStrategyContract;
 
 class HashShortUrlStrategy implements UrlShortenStrategyContract
 {
-    /**
-     * @param $url
-     * @return string
-     */
-    private function generateUniqueCode($url): string
-    {
-        $hashUrl = md5($url);
-        return substr($hashUrl, 0, UrlShortenerEnum::URL_LENGHT_SEQUENCE);
-    }
-
-    public function encodeUrl (string $url): array
+    public function encodeUrl(string $url): array
     {
         $createUniqueCode = $this->generateUniqueCode($url);
         $shorterUrl = UrlShortenerEnum::SHORTER_URL_PREFIX;
@@ -29,7 +19,17 @@ class HashShortUrlStrategy implements UrlShortenStrategyContract
         ];
     }
 
-    public function decodeUrl (string $url): array
+    /**
+     * @param $url
+     * @return string
+     */
+    private function generateUniqueCode($url): string
+    {
+        $hashUrl = md5($url);
+        return substr($hashUrl, 0, UrlShortenerEnum::URL_LENGHT_SEQUENCE);
+    }
+
+    public function decodeUrl(string $url): array
     {
         $parseUrl = parse_url($url);
         $uniqueCode = ltrim($parseUrl['path'], '/');

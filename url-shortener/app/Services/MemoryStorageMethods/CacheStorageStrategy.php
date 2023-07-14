@@ -22,7 +22,7 @@ class CacheStorageStrategy implements StorageStrategyContract
      */
     public function retrieveData(string $key): mixed
     {
-        if(Cache::has($key)){
+        if (Cache::has($key)) {
             return Cache::get($key);
         }
 

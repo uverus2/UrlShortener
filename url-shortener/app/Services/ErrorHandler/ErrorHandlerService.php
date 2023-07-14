@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-class ErrorHandlerService
+class ErrorHandlerService implements ErrorHandlerContract
 {
     /**
      * @param Exception $error

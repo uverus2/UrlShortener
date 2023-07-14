@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\UrlHandler;
+
 use App\Services\MemoryStorageMethods\StorageStrategyContract;
 
 class UrlHandlerService
@@ -20,9 +21,9 @@ class UrlHandlerService
      */
     public function encode(string $url): array
     {
-      $encodedUrl = $this->strategy->encodeUrl($url);
-      $this->storage->storeData($encodedUrl, $encodedUrl['unique_code']);
-      return $encodedUrl;
+        $encodedUrl = $this->strategy->encodeUrl($url);
+        $this->storage->storeData($encodedUrl, $encodedUrl['unique_code']);
+        return $encodedUrl;
     }
 
     /**
@@ -32,7 +33,7 @@ class UrlHandlerService
     public function decode(string $url): mixed
     {
         $decodedUrl = $this->strategy->decodeUrl($url);
-        return  $this->storage->retrieveData($decodedUrl['unique_code']);
+        return $this->storage->retrieveData($decodedUrl['unique_code']);
     }
 
     /**

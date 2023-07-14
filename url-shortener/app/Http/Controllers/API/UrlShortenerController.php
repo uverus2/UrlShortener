@@ -7,13 +7,13 @@ use App\Http\Requests\UrlShortenerRequest;
 use App\Services\ErrorHandler\ErrorHandlerService;
 use App\Services\UrlHandler\UrlHandlerService;
 use App\UtilityTraits\GeneralTrait;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
-use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
-class UrlShortener extends Controller
+class UrlShortenerController extends Controller
 {
     use GeneralTrait;
 
@@ -33,18 +33,18 @@ class UrlShortener extends Controller
      */
     public function encodeUrl(UrlShortenerRequest $request): JsonResponse
     {
-       $this->validate($request, [
-           'url' => 'required|url',
-       ]);
+        $this->validate($request, [
+            'url' => 'required|url',
+        ]);
 
-        try{
-           return response()->json(
-               $this->handler->encode($request->input('url')),
-               Response::HTTP_OK
-           );
+        try {
+            return response()->json(
+                $this->handler->encode($request->input('url')),
+                Response::HTTP_OK
+            );
 
-        }catch(Exception $e){
-           return $this->errorHandler->handleException($e);
+        } catch (Exception $e) {
+            return $this->errorHandler->handleException($e);
         }
     }
 
@@ -54,15 +54,15 @@ class UrlShortener extends Controller
      */
     public function decodeBySpecificUrl(UrlShortenerRequest $request): JsonResponse
     {
-        try{
+        try {
             $decodedUrl = $this->handler->decode($request->input('url'));
             $this->verifyUrlIsFound($decodedUrl);
 
             return response()->json([
                 'original_url' => $decodedUrl['original_url']
             ], Response::HTTP_OK);
-        }catch(Exception $e){
-           return $this->errorHandler->handleException($e);
+        } catch (Exception $e) {
+            return $this->errorHandler->handleException($e);
         }
     }
 
@@ -72,14 +72,14 @@ class UrlShortener extends Controller
      */
     public function decodeBySpecificUrlCode($urlCode): JsonResponse
     {
-        try{
+        try {
             $decodedUrl = $this->handler->decodeByCode($urlCode);
             $this->verifyUrlIsFound($decodedUrl);
 
             return response()->json([
                 'original_url' => $decodedUrl['original_url']
             ], Response::HTTP_OK);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return $this->errorHandler->handleException($e);
         }
     }
@@ -90,12 +90,12 @@ class UrlShortener extends Controller
      */
     public function redirectToUrl(UrlShortenerRequest $request): JsonResponse|RedirectResponse
     {
-        try{
+        try {
             $decodedUrl = $this->handler->decode($request->input('url'));
             $this->verifyUrlIsFound($decodedUrl);
 
             return redirect()->away($decodedUrl['original_url']);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return $this->errorHandler->handleException($e);
         }
     }
