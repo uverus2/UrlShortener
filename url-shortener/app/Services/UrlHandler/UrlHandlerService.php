@@ -1,33 +1,17 @@
 <?php
 
 namespace App\Services\UrlHandler;
-use Illuminate\Support\Facades\Cache;
+use App\Services\MemoryStorageMethods\StorageStrategyContract;
 
 class UrlHandlerService
 {
     protected UrlShortenStrategyContract $strategy;
+    protected StorageStrategyContract $storage;
 
-    public function __construct(UrlShortenStrategyContract $strategy)
+    public function __construct(UrlShortenStrategyContract $strategy, StorageStrategyContract $storage)
     {
         $this->strategy = $strategy;
-    }
-
-    /**
-     * @param $encodedUrl
-     * @return void
-     */
-    private function storeUrlInCache($encodedUrl): void
-    {
-        Cache::put($encodedUrl['unique_code'], $encodedUrl);
-    }
-
-    private function retrieveFromCache($code)
-    {
-        if(Cache::has($code)){
-            return Cache::get($code);
-        }
-
-        return [];
+        $this->storage = $storage;
     }
 
     /**
@@ -37,8 +21,7 @@ class UrlHandlerService
     public function encode(string $url): array
     {
       $encodedUrl = $this->strategy->encodeUrl($url);
-      $this->storeUrlInCache($encodedUrl);
-
+      $this->storage->storeData($encodedUrl, $encodedUrl['unique_code']);
       return $encodedUrl;
     }
 
@@ -48,8 +31,8 @@ class UrlHandlerService
      */
     public function decode(string $url): mixed
     {
-        $decodeUrl = $this->strategy->decodeUrl($url);
-        return $this->retrieveFromCache($decodeUrl['unique_code']);
+        $decodedUrl = $this->strategy->decodeUrl($url);
+        return  $this->storage->retrieveData($decodedUrl['unique_code']);
     }
 
     /**
@@ -58,6 +41,6 @@ class UrlHandlerService
      */
     public function decodeByCode(string $code): mixed
     {
-        return $this->retrieveFromCache($code);
+        return $this->storage->retrieveData($code);
     }
 }
