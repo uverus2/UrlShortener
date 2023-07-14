@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UrlShortenerRequest;
 use App\Services\UrlHandler\UrlHandlerService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Exception;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class UrlShortener extends Controller
@@ -20,12 +20,11 @@ class UrlShortener extends Controller
     }
 
     /**
-     * @param Request $request
-     * @param UrlHandlerService $handler
+     * @param UrlShortenerRequest $request
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function encodeUrl(Request $request)
+    public function encodeUrl(UrlShortenerRequest $request): JsonResponse
     {
        $this->validate($request, [
            'url' => 'required|url',
@@ -42,13 +41,12 @@ class UrlShortener extends Controller
         }
     }
 
-
-    public function decodeBySpecificUrl(Request $request)
+    /**
+     * @param UrlShortenerRequest $request
+     * @return JsonResponse|void
+     */
+    public function decodeBySpecificUrl(UrlShortenerRequest $request)
     {
-        $this->validate($request, [
-            'url' => 'required|url',
-        ]);
-
         try{
             $decodeUrl = $this->handler->decode($request->input('url'));
             return response()->json([
@@ -59,6 +57,10 @@ class UrlShortener extends Controller
         }
     }
 
+    /**
+     * @param $urlCode
+     * @return JsonResponse|void
+     */
     public function decodeBySpecificUrlCode($urlCode)
     {
         try{
@@ -71,12 +73,12 @@ class UrlShortener extends Controller
         }
     }
 
-    public function redirectToUrl(Request $request)
+    /**
+     * @param UrlShortenerRequest $request
+     * @return RedirectResponse|void
+     */
+    public function redirectToUrl(UrlShortenerRequest $request)
     {
-        $this->validate($request, [
-            'url' => 'required|url',
-        ]);
-
         try{
             $decodeUrl = $this->handler->decode($request->input('url'));
             return redirect()->away($decodeUrl['original_url']);
