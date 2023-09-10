@@ -33,9 +33,10 @@ class UrlShortenerController extends Controller
      */
     public function encodeUrl(UrlShortenerRequest $request): JsonResponse
     {
-        $this->validate($request, [
-            'url' => 'required|url',
-        ]);
+        //Alternative to using form request validator
+        //$this->validate($request, [
+        //   'url' => 'required|url',
+        //]);
 
         try {
             return response()->json(
